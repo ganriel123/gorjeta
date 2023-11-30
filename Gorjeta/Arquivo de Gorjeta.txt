@@ -1,0 +1,208 @@
+
+
+Conexão de banco de dados ________________________________________________________________________
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using MySql.Data.MySqlClient;
+
+namespace Mapa_de_exeplo
+{
+    public class ConexaoComMySQL : IDisposable
+    {
+        private MySqlConnection conexao;
+        private string stringConexao;
+
+        public ConexaoComMySQL()
+        {
+            stringConexao = "Server=localhost;Database=dbbarbearia;Uid=gabriel;Pwd=p1ctasuncservant;";
+            conexao = new MySqlConnection(stringConexao);
+        }
+
+        public void AbrirConexao()
+        {
+            if (conexao.State == System.Data.ConnectionState.Closed)
+            {
+                conexao.Open();
+            }
+        }
+
+        public void FecharConexao()
+        {
+            if (conexao.State == System.Data.ConnectionState.Open)
+            {
+                conexao.Close();
+            }
+        }
+
+        // Você pode criar métodos para executar consultas e comandos aqui.
+
+        public MySqlConnection GetConexao()
+        {
+            return conexao;
+        }
+        public void Dispose()
+        {
+            FecharConexao();
+            GC.SuppressFinalize(this);
+        }
+    }
+}
+
+
+
+Cadastrar _______________________________________________________________________________
+
+
+string email = textBox4.Text;
+            if (!email.Contains("@"))
+            {
+                ConexaoComMySQL conexaoMySQL = null;
+
+                try
+                {
+                    conexaoMySQL = new ConexaoComMySQL();
+                    conexaoMySQL.AbrirConexao();
+
+                    {
+                        conexaoMySQL.AbrirConexao();
+
+                        // Substitua "Funcionarios" pelo nome da tabela de funcionários
+                        string sqlQuery = "INSERT INTO Funcionarios (NomeDoFuncionario, EmailDoFuncionario, TelCelDoFuncionario, RG, CPF, Endereco, CEP, Municipio, Especialidade) " +
+                                          "VALUES (@Nome, @Email, @Telefone, @RG, @CPF, @Endereco, @CEP, @Municipio, @Especialidade)";
+
+                        MySqlCommand command = new MySqlCommand(sqlQuery, conexaoMySQL.GetConexao());
+
+                        // Substitua @Nome, @Email, @Telefone, @RG, @CPF, @Endereco, @CEP, @Municipio pelos valores reais dos campos
+                        command.Parameters.AddWithValue("@Nome", textBox2.Text);
+                        command.Parameters.AddWithValue("@Email", textBox4.Text);
+                        command.Parameters.AddWithValue("@Telefone", maskedTextBox4.Text);
+                        command.Parameters.AddWithValue("@RG", maskedTextBox1.Text);
+                        command.Parameters.AddWithValue("@CPF", maskedTextBox2.Text);
+                        command.Parameters.AddWithValue("@Endereco", textBox5.Text);
+                        command.Parameters.AddWithValue("@CEP", maskedTextBox3.Text);
+                        command.Parameters.AddWithValue("@Municipio", textBox3.Text);
+                        command.Parameters.AddWithValue("@Especialidade", txtEspecialidade.Text);
+
+                        int linhasAfetadas = command.ExecuteNonQuery();
+
+                        if (linhasAfetadas > 0)
+                        {
+                            MessageBox.Show("Funcionário cadastrado com sucesso!");
+                            // Adicione lógica adicional após o cadastro, se necessário
+                            LimparCampos();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Falha ao cadastrar o funcionário. Verifique os dados e tente novamente.");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Erro ao cadastrar o funcionário: " + ex.Message);
+                }
+                finally
+                {
+                    // Garante que a conexão será fechada, independentemente de ocorrerem exceções ou não.
+                    conexaoMySQL?.FecharConexao();
+                }
+            }
+            else
+            {
+                MessageBox.Show("Digite um E-mail Valido");
+            }
+        
+        }
+
+
+Excluir ______________________________________________________________________________________________
+
+ConexaoComMySQL conexaoMySQL = null;
+
+            try
+            {
+                conexaoMySQL = new ConexaoComMySQL();
+                conexaoMySQL.AbrirConexao();
+
+                string sqlQuery = "DELETE FROM Funcionarios WHERE CodigoDoFuncionario = @Codigo";
+
+                MySqlCommand command = new MySqlCommand(sqlQuery, conexaoMySQL.GetConexao());
+
+                // Use o código do funcionário passado como parâmetro
+                command.Parameters.AddWithValue("@Codigo", textBox1.Text);
+
+                int linhasAfetadas = command.ExecuteNonQuery();
+
+                if (linhasAfetadas > 0)
+                {
+                    MessageBox.Show("Funcionário excluído com sucesso!");
+                    // Adicione lógica adicional após a exclusão, se necessário
+                    LimparCampos();
+                }
+                else
+                {
+                    MessageBox.Show("Falha ao excluir o funcionário. Verifique os dados e tente novamente.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao excluir o funcionário: " + ex.Message);
+            }
+            finally
+            {
+                conexaoMySQL?.FecharConexao();
+            }
+        }
+
+
+Limpar ___________________________________________________________________________________
+
+
+// Limpar campos da janela Funcionarios
+            textBox1.Clear();
+            textBox2.Clear(); // Nome do Funcionário
+            textBox4.Clear(); // E-mail
+            maskedTextBox4.Clear(); // Telefone
+            maskedTextBox1.Clear(); // RG
+            maskedTextBox2.Clear(); // CPF
+            textBox5.Clear(); // Endereço
+            maskedTextBox3.Clear(); // CEP
+            textBox3.Clear(); // Município
+            txtEspecialidade.Clear();
+
+
+Abrir outra janela __________________________________________________________________
+
+// Criar uma instância da nova janela (PainelAdmin)
+            PesquisarFuncionarios formPainelAdmin = new PesquisarFuncionarios();
+
+            // Exibir a nova janela
+            formPainelAdmin.Show();
+
+dllls ______________________________________________________________________
+
+using System.Runtime.InteropServices;
+
+[DllImport("user32.dll")]
+        private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+
+        [DllImport("user32.dll")]
+        private static extern bool ReleaseCapture();
+
+Banco de dados _______________________________________________________________________________
+
+CREATE DATABASE Gorjeta;
+USE Gorjeta;
+
+CREATE TABLE funcionarios (
+    id INT AUTO_INCREMENT,
+    nome VARCHAR(100),
+    email VARCHAR(100),
+    nota_de_servico INT,
+    valor_total_de_gorjeta DECIMAL(10, 2),
+    PRIMARY KEY (id)
+);
